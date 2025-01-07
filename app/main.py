@@ -1,65 +1,120 @@
 from fasthtml.common import * # type: ignore
 from fasthtml.common import (
-    Div, Form, Label, Input, Button, Html, Head, Body, P, Title, Titled, Script, Link, Meta, H1, serve,
+    Div, Form, Input, Button, Html, Head, Body, Title, Script, Link, Meta, H2, serve,
 )
 import re
 
 # for docker
-# app, rt = fast_app(static_path="static") # type: ignore
+app, rt = fast_app(static_path="static") # type: ignore
 
 # for local
-app, rt = fast_app(static_path="app/static") # type: ignore
+# app, rt = fast_app(static_path="app/static") # type: ignore
 
-# TODO:
-#   Make button reference endpoint which would return text into a DIV containing conversion result
-#   Add Reset button to clear values from input
+
+def string_cleaner(temperature: str):
+    global clean_string
+    characters_to_remove = " "
+    replace_dictionary = {",":"."}
+
+    clean_string = temperature.translate(str.maketrans('', '', characters_to_remove))
+    for old_character, new_character in replace_dictionary.items():
+        clean_string = clean_string.replace(old_character, new_character)
+    return clean_string
 
 temperature_form = Form(
     method="post",
     action="/convert"
     )(
-        Label("Temperature", cls="select", style="padding-bottom: 0.35rem; font-variant-caps: petite-caps;"),
+        Div(
+            H2("Temperature",
+                style="font-variant-caps: petite-caps;"
+            ),
+            Button(
+                "Reset",
+                hx_get="/",
+                hx_target="body",
+                hx_push_url="true",
+                cls="reset",
+            ),
+            cls="row",
+            style="margin-bottom: -1vw; gap: 2vw; justify-content: space-around; max-width: 400px;",
+        ),
         Input(
             id="temperature",
             name="temperature",
             type="text",
             pattern="^-?\d+(\.\d+)?$",
-            title="\nEnter a valid floating-point number",
+            title="Enter a valid floating-point number",
             required=True,
-            cls="select",
+            cls="test",
         ),
-        Button("Fahrenheit → Celsius",
-            hx_get="/FC",
-            hx_target="#ftc",
-            hx_include="#temperature",
-            type="button",  # prevent default submission
+        Div(cls="spacing"),
+        Div(
+            Button("°F → °C",
+                id="fc-button",
+                hx_get="/FC",
+                hx_target="#ftc",
+                hx_include="#temperature",
+                hx_swap="outerHTML",
+                type="button",
+            ),
+            Div(id="ftc", cls="output"),
+            cls="row",
         ),
-        Div(id="ftc"),
-
-        Button("Fahrenheit → Kelvin",
-            name="conversion",
-            value="fk",
-            type="submit",
+        Div(
+            Button("°F → °K",
+                hx_get="/FK",
+                hx_target="#ftk",
+                hx_include="#temperature",
+                hx_swap="outerHTML",
+                type="button",
+            ),
+            Div(id="ftk", cls="output"),
+            cls="row",
         ),
-        Button("Celsius → Fahrenheit",
-            name="conversion",
-            value="cf",
-            type="submit",
+        Div(
+            Button("°C → °F",
+                hx_get="/CF",
+                hx_target="#ctf",
+                hx_include="#temperature",
+                hx_swap="outerHTML",
+                type="button",
+            ),
+            Div(id="ctf", cls="output"),
+            cls="row",
         ),
-        Button("Celsius → Kelvin",
-            name="conversion",
-            value="ck",
-            type="submit",
+        Div(
+            Button("°C → °K",
+                hx_get="/CK",
+                hx_target="#ctk",
+                hx_include="#temperature",
+                hx_swap="outerHTML",
+                type="button",
+            ),
+            Div(id="ctk", cls="output"),
+            cls="row",
         ),
-        Button("Kelvin → Celsius",
-            name="conversion",
-            value="kc",
-            type="submit",
+        Div(
+            Button("°K → °C",
+                hx_get="/KC",
+                hx_target="#ktc",
+                hx_include="#temperature",
+                hx_swap="outerHTML",
+                type="button",
+            ),
+            Div(id="ktc", cls="output"),
+            cls="row",
         ),
-        Button("Kelvin → Fahrenheit",
-            name="conversion",
-            value="kf",
-            type="submit",
+        Div(
+            Button("°K → °F",
+                hx_get="/KF",
+                hx_target="#ktf",
+                hx_include="#temperature",
+                hx_swap="outerHTML",
+                type="button",
+            ),
+            Div(id="ktf", cls="output"),
+            cls="row",
         ),
         cls="container",
     )
@@ -78,87 +133,85 @@ def homepage():
         Body(temperature_form)
     )
 
-@rt("/convert", methods=["POST"])
-def convert_temperature(temperature:str, conversion:str):
-    # validation:
-    if not re.match(r"^-?\d+(\.\d+)?$", temperature):
-        return Html(
-            Head(
-                Title("Error"),
-                Meta(name="viewport", content="width=device-width, initial-scale=1"),
-                Script("""
-                function homePage() {
-                        window.location.href = "/";
-                   }
-                   """),
-                Link(rel="stylesheet", href="styles.css"),
-                Link(rel="icon", href="images/favicon.ico", type="image/x-icon"),
-                Link(rel="icon", href="images/favicon.png", type="image/png"),
-            ),
-            Body(
-                Titled("Invalid Input"),
-                P("Please enter a valid floating-point number for the temperature."),
-                Button(
-                    "Return to Form", onclick="homePage()",
-                ),
-            )
-        )
-
-    # temperature conversion to float:
-    temperature_float = float(temperature)
-
-    # conversion(calculation) logic
-    if conversion == "kc":
-        kc = temperature_float + 273.15
-        result = f"{temperature_float}° Kelvin equals to {kc:.2f}°C"
-    elif conversion == "kf":
-        kf = ((temperature_float - 273.15) * (9/5)) + 32
-        result = f"{temperature_float}° Kelvin equals to {kf:.2f}°F"
-    elif conversion == "fc":
-        fc = (temperature_float - 32) * (5/9)
-        result = f"{temperature_float}° Fahrenheit equals to {fc:.2f}°C"
-    elif conversion == "fk":
-        fk = ((temperature_float - 32) * (5/9)) + 273.15
-        result = f"{temperature_float}° Fahrenheit equals to {fk:.2f}°K"
-    elif conversion == "cf":
-        cf = (temperature_float * (9/5)) + 32
-        result = f"{temperature_float}° Celsius equals to {cf:.2f}°F"
-    elif conversion == "ck":
-        ck = temperature_float - 273.15
-        result = f"{temperature_float}° Celsius equals to {ck:.2f}°K"
-
-
-    return Html(
-        Head(
-            Title("Conversion Results"),
-            Meta(name="viewport", content="width=device-width, initial-scale=1"),
-            Script("""
-                function homePage() {
-                        window.location.href = "/";
-                   }
-                   """),
-            Link(rel="stylesheet", href="styles.css"),
-            Link(rel="icon", href="images/favicon.ico", type="image/x-icon"),
-            Link(rel="icon", href="images/favicon.png", type="image/png"),
-        ),
-        Body(
-            H1("Conversion Results"),
-            P(result),
-            Button(
-                "Return to Form", onclick="homePage()",
-                style="margin-top: 1.25rem;",
-            ),
-        )
-    )
-
 @rt("/FC")
 def FC(temperature: str):
-    temperature_float = float(temperature)
+    string_cleaner(temperature)
+    if not re.match(r"^-?\d+(\.\d+)?$", clean_string):
+        return Div("Invalid Input. Please enter a valid floating-point number.", id="ftc", cls="output")
+
+    temperature_float = float(clean_string)
 
     fc = (temperature_float - 32) * (5/9)
-    result = f"{temperature_float}° Fahrenheit equals to {fc:.2f}°C"
+    result = f"{temperature_float}°F equals to {fc:.2f}°C"
 
-    return Div(result, id="ftc")
+    return Div(result, id="ftc", cls="output")
+
+@rt("/FK")
+def FK(temperature: str):
+    string_cleaner(temperature)
+    if not re.match(r"^-?\d+(\.\d+)?$", temperature):
+        return Div("Invalid Input. Please enter a valid floating-point number.", id="ftk", cls="output")
+
+    temperature_float = float(temperature)
+
+    fk = ((temperature_float - 32) * (5/9)) + 273.15
+    result = f"{temperature_float}°F equals to {fk:.2f}°K"
+
+    return Div(result, id="ftk", cls="output")
+
+@rt("/CF")
+def CF(temperature: str):
+    string_cleaner(temperature)
+    if not re.match(r"^-?\d+(\.\d+)?$", temperature):
+        return Div("Invalid Input. Please enter a valid floating-point number.", id="ctf", cls="output")
+
+
+    temperature_float = float(temperature)
+
+    cf = (temperature_float * (9/5)) + 32
+    result = f"{temperature_float}°C equals to {cf:.2f}°F"
+
+    return Div(result, id="ctf", cls="output")
+
+@rt("/CK")
+def CK(temperature: str):
+    string_cleaner(temperature)
+    if not re.match(r"^-?\d+(\.\d+)?$", temperature):
+        return Div("Invalid Input. Please enter a valid floating-point number.", id="ctk", cls="output")
+
+    temperature_float = float(temperature)
+
+    ck = temperature_float - 273.15
+    result = f"{temperature_float}°C equals to {ck:.2f}°K"
+
+    return Div(result, id="ctk", cls="output")
+
+@rt("/KC")
+def KC(temperature: str):
+    string_cleaner(temperature)
+    if not re.match(r"^-?\d+(\.\d+)?$", temperature):
+        return Div("Invalid Input. Please enter a valid floating-point number.", id="ktc", cls="output")
+
+    temperature_float = float(temperature)
+
+    kc = temperature_float + 273.15
+    result = f"{temperature_float}°K equals to {kc:.2f}°C"
+
+    return Div(result, id="ktc", cls="output")
+
+@rt("/KF")
+def KF(temperature: str):
+    string_cleaner(temperature)
+    if not re.match(r"^-?\d+(\.\d+)?$", temperature):
+        return Div("Invalid Input. Please enter a valid floating-point number.", id="ktf", cls="output")
+
+    temperature_float = float(temperature)
+
+    kf = ((temperature_float - 273.15) * (9/5)) + 32
+    result = f"{temperature_float}°K equals to {kf:.2f}°F"
+
+    return Div(result, id="ktf", cls="output")
+
 
 if __name__ == '__main__':
     # Important: Use host='0.0.0.0' to make the server accessible outside the container

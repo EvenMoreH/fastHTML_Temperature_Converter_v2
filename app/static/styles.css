@@ -190,6 +190,7 @@ button {
     font-size: clamp(0.875rem, 1rem, 1.25rem);
     padding-right: 0.1vw;
   }
+
   .row {
     width: 100%;
     max-width: 440px;

@@ -45,7 +45,7 @@ temperature_form = Form(
             type="text",
             pattern="^-?\d+(\.\d+)?$",
             title="Enter a valid floating-point number",
-            required=True,
+            required="true",
             cls="test",
         ),
         Div(cls="spacing"),
@@ -136,8 +136,12 @@ def homepage():
 @rt("/FC")
 def FC(temperature: str):
     string_cleaner(temperature)
+
+    if temperature == "":
+        return Div("Please enter a valid floating-point number.", id="ftc", cls="output", style="color: rgba(187, 25, 25, 0.8) !important;")
+
     if not re.match(r"^-?\d+(\.\d+)?$", clean_string):
-        return Div("Invalid Input. Please enter a valid floating-point number.", id="ftc", cls="output")
+        return Div("Invalid Input. Please enter a valid floating-point number.", id="ftc", cls="output", style="color: rgba(187, 25, 25, 0.8) !important;")
 
     temperature_float = float(clean_string)
 
@@ -149,8 +153,12 @@ def FC(temperature: str):
 @rt("/FK")
 def FK(temperature: str):
     string_cleaner(temperature)
+
+    if temperature == "":
+        return Div("Please enter a valid floating-point number.", id="ftk", cls="output", style="color: rgba(187, 25, 25, 0.8) !important;")
+
     if not re.match(r"^-?\d+(\.\d+)?$", temperature):
-        return Div("Invalid Input. Please enter a valid floating-point number.", id="ftk", cls="output")
+        return Div("Invalid Input. Please enter a valid floating-point number.", id="ftk", cls="output", style="color: rgba(187, 25, 25, 0.8) !important;")
 
     temperature_float = float(temperature)
 
@@ -162,9 +170,12 @@ def FK(temperature: str):
 @rt("/CF")
 def CF(temperature: str):
     string_cleaner(temperature)
-    if not re.match(r"^-?\d+(\.\d+)?$", temperature):
-        return Div("Invalid Input. Please enter a valid floating-point number.", id="ctf", cls="output")
 
+    if temperature == "":
+        return Div("Please enter a valid floating-point number.", id="ctf", cls="output", style="color: rgba(187, 25, 25, 0.8) !important;")
+
+    if not re.match(r"^-?\d+(\.\d+)?$", temperature):
+        return Div("Invalid Input. Please enter a valid floating-point number.", id="ctf", cls="output", style="color: rgba(187, 25, 25, 0.8) !important;")
 
     temperature_float = float(temperature)
 
@@ -176,8 +187,12 @@ def CF(temperature: str):
 @rt("/CK")
 def CK(temperature: str):
     string_cleaner(temperature)
+
+    if temperature == "":
+        return Div("Please enter a valid floating-point number.", id="ctk", cls="output", style="color: rgba(187, 25, 25, 0.8) !important;")
+
     if not re.match(r"^-?\d+(\.\d+)?$", temperature):
-        return Div("Invalid Input. Please enter a valid floating-point number.", id="ctk", cls="output")
+        return Div("Invalid Input. Please enter a valid floating-point number.", id="ctk", cls="output", style="color: rgba(187, 25, 25, 0.8) !important;")
 
     temperature_float = float(temperature)
 
@@ -189,8 +204,12 @@ def CK(temperature: str):
 @rt("/KC")
 def KC(temperature: str):
     string_cleaner(temperature)
+
+    if temperature == "":
+        return Div("Please enter a valid floating-point number.", id="ktc", cls="output", style="color: rgba(187, 25, 25, 0.8) !important;")
+
     if not re.match(r"^-?\d+(\.\d+)?$", temperature):
-        return Div("Invalid Input. Please enter a valid floating-point number.", id="ktc", cls="output")
+        return Div("Invalid Input. Please enter a valid floating-point number.", id="ktc", cls="output", style="color: rgba(187, 25, 25, 0.8) !important;")
 
     temperature_float = float(temperature)
 
@@ -202,8 +221,12 @@ def KC(temperature: str):
 @rt("/KF")
 def KF(temperature: str):
     string_cleaner(temperature)
+
+    if temperature == "":
+        return Div("Please enter a valid floating-point number.", id="ktf", cls="output", style="color: rgba(187, 25, 25, 0.8) !important;")
+
     if not re.match(r"^-?\d+(\.\d+)?$", temperature):
-        return Div("Invalid Input. Please enter a valid floating-point number.", id="ktf", cls="output")
+        return Div("Invalid Input. Please enter a valid floating-point number.", id="ktf", cls="output", style="color: rgba(187, 25, 25, 0.8) !important;")
 
     temperature_float = float(temperature)
 

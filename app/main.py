@@ -1,6 +1,6 @@
 from fasthtml.common import * # type: ignore
 from fasthtml.common import (
-    Form, Label, Input, Button, Html, Head, Body, P, Title, Titled, Script, Link, Meta, H1
+    Div, Form, Label, Input, Button, Html, Head, Body, P, Title, Titled, Script, Link, Meta, H1, serve,
 )
 import re
 
@@ -27,43 +27,39 @@ temperature_form = Form(
             title="\nEnter a valid floating-point number",
             required=True,
             cls="select",
-            style="margin-bottom: 1.5rem; width: clamp(225px, 20vw, 400px);"
         ),
         Button("Fahrenheit → Celsius",
-            name="conversion",
-            value="fc",
-            type="submit",
-            style="margin: 1rem; width: clamp(225px, 20vw, 400px);"
+            hx_get="/FC",
+            hx_target="#ftc",
+            hx_include="#temperature",
+            type="button",  # prevent default submission
         ),
+        Div(id="ftc"),
+
         Button("Fahrenheit → Kelvin",
             name="conversion",
             value="fk",
             type="submit",
-            style="margin: 1rem; width: clamp(225px, 20vw, 400px);"
         ),
         Button("Celsius → Fahrenheit",
             name="conversion",
             value="cf",
             type="submit",
-            style="margin: 1rem; width: clamp(225px, 20vw, 400px);"
         ),
         Button("Celsius → Kelvin",
             name="conversion",
             value="ck",
             type="submit",
-            style="margin: 1rem; width: clamp(225px, 20vw, 400px);"
         ),
         Button("Kelvin → Celsius",
             name="conversion",
             value="kc",
             type="submit",
-            style="margin: 1rem; width: clamp(225px, 20vw, 400px);"
         ),
         Button("Kelvin → Fahrenheit",
             name="conversion",
             value="kf",
             type="submit",
-            style="margin: 1rem; width: clamp(225px, 20vw, 400px);"
         ),
         cls="container",
     )
@@ -74,6 +70,7 @@ def homepage():
         Head(
             Title("Temperature Converter"),
             Meta(name="viewport", content="width=device-width, initial-scale=1"),
+            Script(src="https://unpkg.com/htmx.org"),
             Link(rel="stylesheet", href="styles.css"),
             Link(rel="icon", href="images/favicon.ico", type="image/x-icon"),
             Link(rel="icon", href="images/favicon.png", type="image/png"),
@@ -154,6 +151,14 @@ def convert_temperature(temperature:str, conversion:str):
         )
     )
 
+@rt("/FC")
+def FC(temperature: str):
+    temperature_float = float(temperature)
+
+    fc = (temperature_float - 32) * (5/9)
+    result = f"{temperature_float}° Fahrenheit equals to {fc:.2f}°C"
+
+    return Div(result, id="ftc")
 
 if __name__ == '__main__':
     # Important: Use host='0.0.0.0' to make the server accessible outside the container
